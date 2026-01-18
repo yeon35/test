@@ -1,4 +1,4 @@
-name: CI Only (No Docker)
+name: CI Only (Notify Discord)
 
 on:
   push:
@@ -18,7 +18,31 @@ jobs:
 
       - name: CI pass check
         run: |
-          echo "CI succeeded ✅"
+          echo "CI succeeded"
           echo "Branch: ${GITHUB_REF}"
           echo "Commit: ${GITHUB_SHA}"
           ls -al
+
+      # ✅ CI 성공 시 Discord 알림
+      - name: Notify Discord (Success)
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                 "username": "GitHub CI",
+                 "content": "✅ **CI SUCCESS**\n📦 Repo: '"${GITHUB_REPOSITORY}"'\n🌿 Branch: '"${GITHUB_REF_NAME}"'\n🔑 Commit: '"${GITHUB_SHA}"'"
+               }' \
+               ${{ secrets.DISCORD_URL }}
+
+      # ❌ CI 실패 시 Discord 알림
+      - name: Notify Discord (Failure)
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                 "username": "GitHub CI",
+                 "content": "❌ **CI FAILED**\n📦 Repo: '"${GITHUB_REPOSITORY}"'\n🌿 Branch: '"${GITHUB_REF_NAME}"'\n🔑 Commit: '"${GITHUB_SHA}"'\n🔍 Check Actions log for details."
+               }' \
+               ${{ secrets.DISCORD_URL }}
