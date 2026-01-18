@@ -23,6 +23,10 @@ jobs:
           echo "Commit: ${GITHUB_SHA}"
           ls -al
 
+      - name: Force failure (test)
+        run: exit 1
+
+
       # ✅ CI 성공 시 Discord 알림
       - name: Notify Discord (Success)
         if: success()
